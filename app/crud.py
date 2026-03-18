@@ -1,0 +1,40 @@
+from sqlalchemy.orm import  Session
+from .models import DBArticle
+from .schemas import ArticleCreate
+# 根据id查询
+def get_article_id(db:Session,article_id:int):
+   return db.query(DBArticle).filter(DBArticle.id==article_id).first()
+
+# 查询全部
+def get_articles(db:Session):
+    return db.query(DBArticle).all()
+
+# 写入
+def create_article(db:Session,article:ArticleCreate):
+    db_article=DBArticle(title=article.title,content=article.content,author=article.author)
+    db.add(db_article)
+    db.commit()
+    db.refresh(db_article)
+    return db_article
+
+# 删除
+def delete_article(db:Session,article_id:int):
+    db_article=db.query(DBArticle).filter(DBArticle.id==article_id).first()
+    if db_article:
+        db.delete(db_article)
+        db.commit()
+        return True
+    return False
+
+# 更新
+def update_article(db:Session,article_id:int,article:ArticleCreate):
+    db_article=db.query(DBArticle).filter(DBArticle.id==article_id).first()
+    if db_article:
+        db_article.title=article.title
+        db_article.content=article.content
+        db_article.author=article.author
+
+        db.commit()
+        db.refresh(db_article)
+        return db_article
+    return  None
