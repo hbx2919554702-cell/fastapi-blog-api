@@ -1,4 +1,5 @@
 from chardet.cli.chardetect import description_of
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, Depends, HTTPException,Query
 from sqlalchemy.orm import Session
 from typing import List, Optional
@@ -10,6 +11,16 @@ from . import crud
 
 Base.metadata.create_all(bind=engine)
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # 允许所有前端地址访问
+    allow_credentials=True,
+    allow_methods=["*"],  # 允许所有请求方法(GET, POST, DELETE等)
+    allow_headers=["*"],
+)
+
+
 
 @app.get("/")
 def read_root():
