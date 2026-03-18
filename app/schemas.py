@@ -13,7 +13,6 @@ class ArticleResponse(ArticleCreate):
     id:int
     created_at:Optional[datetime]=None
     updated_at:Optional[datetime]=None
-    updated_at:Optional[datetime]
     class Config:
         from_attributes = True
 
