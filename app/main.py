@@ -1,6 +1,7 @@
-from fastapi import FastAPI, Depends, HTTPException
+from chardet.cli.chardetect import description_of
+from fastapi import FastAPI, Depends, HTTPException,Query
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 from fastapi.responses  import RedirectResponse
 
 from .schemas import ArticleCreate,ArticleResponse,ArticleDetail
@@ -22,8 +23,14 @@ def create_article(article:ArticleCreate,db:Session = Depends(get_db)):
 
 # 读取数据
 @app.get('/articles',response_model=List[ArticleResponse])
-def read_articles(db:Session = Depends(get_db)):
-    articles=crud.get_articles(db=db)
+def read_articles(
+        db:Session = Depends(get_db),
+        page:int=Query(1,description="请求的页码从1开始",ge=1),
+        limit:int=Query(10,ge=1,le=100,description="每页数量"),
+        keyword:Optional[str]=Query(None,description="搜索文章标题关键字")
+):
+    skip=(page-1)*limit
+    articles=crud.get_articles(db=db,skip=skip,limit=limit,keyword=keyword)
     return articles
 
 # 根据id读数据
