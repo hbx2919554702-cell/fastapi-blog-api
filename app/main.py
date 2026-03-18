@@ -22,7 +22,7 @@ def create_article(article:ArticleCreate,db:Session = Depends(get_db)):
 
 
 # 读取数据
-@app.get('/articles',response_model=List[ArticleResponse])
+@app.get('/article',response_model=List[ArticleResponse])
 def read_articles(
         db:Session = Depends(get_db),
         page:int=Query(1,description="请求的页码从1开始",ge=1),
