@@ -17,5 +17,7 @@ class ArticleResponse(ArticleCreate):
 
 # 根据文章id查文章
 class ArticleDetail(ArticleCreate):
+    created_at: datetime
+    updated_at: datetime
     class Config:
         from_attributes = True
