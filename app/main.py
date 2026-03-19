@@ -3,8 +3,9 @@ from fastapi import FastAPI, Depends, HTTPException,Query
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from fastapi.responses  import RedirectResponse
-
-from .schemas import ArticleCreate, ArticleResponse, ArticleDetail, ArticleUpdate
+from fastapi.security import OAuth2PasswordRequestForm
+from .core.security import verify_password,create_access_token
+from .schemas import ArticleCreate, ArticleResponse, ArticleDetail, ArticleUpdate, UserResponse,Token,UserCreate
 from .database import engine,Base,get_db
 from . import crud
 
@@ -18,7 +19,6 @@ app.add_middleware(
     allow_methods=["*"],  # 允许所有请求方法(GET, POST, DELETE等)
     allow_headers=["*"],
 )
-
 
 
 @app.get("/")
@@ -68,4 +68,23 @@ def update_article(article_id:int,article:ArticleUpdate,db:Session = Depends(get
     return db_update_article
 
 
+#####################用户##########################
+#用户注册
+@app.post('/register',response_model=UserResponse)
+def register_user(user:UserCreate,db:Session = Depends(get_db)):
+    db_user=crud.get_users(db=db,username=user.username)
+    if db_user:
+        raise HTTPException(status_code=400,detail="该用户名已被注册")
+    return crud.create_user(db=db,user=user)
+
+#用户登录
+@app.post('/login',response_model=Token)
+def login(form_data: OAuth2PasswordRequestForm = Depends(),db:Session = Depends(get_db)):
+    user=crud.get_users(db=db,username=form_data.username)
+    if not user or not verify_password(form_data.password, user.hashed_password):
+        raise HTTPException(status_code=401,detail="用户密码错误")
+    access_token = create_access_token(data={"sub": user.username})
+    return {"access_token": access_token,
+            "token_type": "bearer",
+            "message":"登陆成功"}
 
