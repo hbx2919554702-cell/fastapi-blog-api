@@ -1,12 +1,12 @@
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel,Field
 # 增
 class ArticleCreate(BaseModel):
-    title: str
+    title: str=Field(min_length=2,max_length=15,description="文章名要求2到15个字符")
     content: str
-    author: str = "匿名用户"
+    author: str
 
 # 查所有文章
 class ArticleResponse(ArticleCreate):
@@ -22,3 +22,7 @@ class ArticleDetail(ArticleCreate):
     updated_at: Optional[datetime]=None
     class Config:
         from_attributes = True
+
+# 更新
+class ArticleUpdate(ArticleCreate):
+    pass
