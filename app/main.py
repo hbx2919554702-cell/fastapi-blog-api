@@ -36,7 +36,7 @@ def create_article(article:ArticleCreate,db:Session = Depends(get_db)):
 def read_articles(
         db:Session = Depends(get_db),
         page:int=Query(1,description="请求的页码从1开始",ge=1),
-        limit:int=Query(10,ge=1,le=100,description="每页数量"),
+        limit:int=Query(10,ge=1,le=20,description="每页数量"),
         keyword:Optional[str]=Query(None,description="搜索文章标题关键字")
 ):
     skip=(page-1)*limit
@@ -88,3 +88,13 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(),db:Session = Depends(
             "token_type": "bearer",
             "message":"登陆成功"}
 
+@app.get('/Users',response_model=List[UserResponse])
+def read_users(db:Session = Depends(get_db),
+               limit:int=Query(10,ge=1,le=20,description="每页数量"),
+               page:int=Query(1,ge=1,description="从第一页开始"),
+               keyword:Optional[str]=Query(None,description="搜索作者关键字")):
+    skip=(page-1)*limit
+    user=crud.get_user_by_username(db=db,limit=limit,skip=skip,keyword=keyword)
+    if user is None:
+        raise HTTPException(status_code=404,detail="作者不存在")
+    return user
