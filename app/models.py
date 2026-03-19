@@ -7,5 +7,5 @@ class DBArticle(Base):
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
     id=Column(Integer,primary_key=True,index=True)
     title=Column(String(50))
-    content=Column(String(200))
-    author=Column(String(20), default='匿名用户')
+    content=Column(String(255))
+    author=Column(String(255), default='匿名用户')
