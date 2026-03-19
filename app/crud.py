@@ -1,6 +1,8 @@
+from datetime import datetime
 from sqlalchemy.orm import  Session
 from .models import DBArticle
-from .schemas import ArticleCreate
+from .schemas import ArticleCreate, ArticleUpdate
+
 
 # 根据id查询
 def get_article_id(db:Session,article_id:int):
@@ -32,12 +34,13 @@ def delete_article(db:Session,article_id:int):
     return False
 
 # 更新
-def update_article(db:Session,article_id:int,article:ArticleCreate):
+def update_article(db:Session,article_id:int,article:ArticleUpdate):
     db_article=db.query(DBArticle).filter(DBArticle.id==article_id).first()
     if db_article:
         db_article.title=article.title
         db_article.content=article.content
         db_article.author=article.author
+        db_article.updated_at=datetime.now()
 
         db.commit()
         db.refresh(db_article)
