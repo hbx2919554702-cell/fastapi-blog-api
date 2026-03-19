@@ -1,4 +1,3 @@
-from chardet.cli.chardetect import description_of
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, Depends, HTTPException,Query
 from sqlalchemy.orm import Session
