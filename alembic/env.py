@@ -5,7 +5,8 @@ from sqlalchemy import pool
 
 from alembic import context
 
-from app.models import DBArticle
+from app.models.articles import DBArticle
+from app.models.users import DBUser
 from app.database import Base,SQLALCHEMY_DATABASE_URL
 import sys
 import os
