@@ -2,7 +2,8 @@
 # 增
 from datetime import datetime
 from typing import Optional
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
+
 
 # 创建文章
 class ArticleCreate(BaseModel):
@@ -15,15 +16,19 @@ class ArticleResponse(ArticleCreate):
     id:int
     created_at:Optional[datetime]=None
     updated_at:Optional[datetime]=None
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(
+        populate_by_name=True,
+        from_attributes=True
+    )
 
 # 根据文章id查文章
 class ArticleDetail(ArticleCreate):
     created_at: Optional[datetime]=None
     updated_at: Optional[datetime]=None
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(
+        populate_by_name=True,
+        from_attributes=True
+    )
 
 # 更新
 class ArticleUpdate(ArticleCreate):
