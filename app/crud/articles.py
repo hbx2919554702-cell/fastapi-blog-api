@@ -17,7 +17,7 @@ def get_articles(db:Session,skip:int=0,limit:int=10,keyword:str=None):
 
 # 写入
 def create_article(db:Session,article:ArticleCreate):
-    db_article=DBArticle(title=article.title,content=article.content,author=article.author)
+    db_article=DBArticle(title=article.title,content=article.content,author_id=article.author_id)
     db.add(db_article)
     db.commit()
     db.refresh(db_article)
