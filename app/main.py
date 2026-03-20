@@ -2,7 +2,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI
 from fastapi.responses  import RedirectResponse
 from .database import engine,Base
-from routers import articles,users
+from app.routers import articles,users
 Base.metadata.create_all(bind=engine)
 app = FastAPI()
 
