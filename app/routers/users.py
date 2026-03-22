@@ -52,7 +52,6 @@ def read_users(
         raise HTTPException(status_code=404,detail="作者不存在")
     return user
 
-
 # 获取个人信息
 @router.get('/infe',response_model=List[UserInfoResponse])
 def get_user_infe(current_user: DBUser=Depends(get_current_user)):
@@ -68,6 +67,7 @@ def update_user_infe(user_data:UserUpdateRequest,current_user: DBUser=Depends(ge
     user_info=UserInfoResponse.model_validate(updated_user)
     return success_response(message="个人信息更新成功",data=user_info)
 
+# 更改密码
 @router.put('/password',response_model=UserPassword)
 def update_user_password(password:UserPassword,current_user: DBUser=Depends(get_current_user),db:Session=Depends(get_db)):
     updated_password=update_password(new_password=password.new_password,old_password=password.old_password,user=current_user,db=db)
