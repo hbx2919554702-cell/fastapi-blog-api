@@ -9,7 +9,6 @@ from pydantic import BaseModel, Field, ConfigDict
 class ArticleCreate(BaseModel):
     title: str=Field(min_length=2,max_length=15,description="文章名要求2到15个字符",json_schema_extra={"example": ""})
     content: str=Field(min_length=1,description="文章内容不能为空",json_schema_extra={"example": ""})
-    author_id: int
 
 # 查所有文章
 class ArticleResponse(ArticleCreate):
