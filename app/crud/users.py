@@ -29,10 +29,10 @@ def get_users(db:Session,username:str):
 
 # 修改个人信息
 def update_user(db:Session,username:str,update_user=UserUpdateRequest):
-    db_user=update_user.model_dump(exclude_unset=True,exclude_none=True)
-    if not db_user:
+    update_dict=update_user.model_dump(exclude_unset=True,exclude_none=True)
+    if not update_dict:
         return get_users(db,username)
-    query=update(DBUser).where(DBUser.username==username).values(**db_user)
+    query=update(DBUser).where(DBUser.username==username).values(**update_dict)
     result=db.execute(query)
     db.commit()
 
