@@ -1,8 +1,6 @@
 from typing import List, Optional
-
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.security import OAuth2PasswordRequestForm
-from sqlalchemy import null
 from sqlalchemy.orm import Session
 from app.core.response import success_response
 from app.database import get_db
