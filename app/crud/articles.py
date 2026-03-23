@@ -1,17 +1,16 @@
 from datetime import datetime
-
-from fastapi import HTTPException
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session,joinedload
 from app.models.articles import DBArticle
 from app.schemas.articles import ArticleUpdate ,ArticleCreate
 
 # 根据id查询
 def get_article_id(db:Session,article_id:int):
-   return db.query(DBArticle).filter(DBArticle.id==article_id).first()
+   return (db.query(DBArticle).options(joinedload(DBArticle.owner)).
+           filter(DBArticle.id==article_id).first())
 
 # 查询全部
 def get_articles(db:Session,skip:int=0,limit:int=10,keyword:str=None):
-    get_article_skip=db.query(DBArticle)
+    get_article_skip=db.query(DBArticle).options(joinedload(DBArticle.owner))
     # 模糊搜索
     if keyword:
         get_article_skip=db.query(DBArticle).filter(DBArticle.title.ilike(f"%{keyword}%"))
