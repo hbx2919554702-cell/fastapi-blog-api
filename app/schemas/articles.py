@@ -2,7 +2,7 @@
 # 增
 from datetime import datetime
 from typing import Optional
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, Field, ConfigDict,AliasPath
 
 
 # 创建文章
@@ -13,6 +13,7 @@ class ArticleCreate(BaseModel):
 # 查所有文章
 class ArticleResponse(ArticleCreate):
     id:int
+    nickname : str = Field(validation_alias=AliasPath("owner","nickname"))
     created_at:Optional[datetime]=None
     updated_at:Optional[datetime]=None
     model_config = ConfigDict(
@@ -24,6 +25,7 @@ class ArticleResponse(ArticleCreate):
 class ArticleDetail(ArticleCreate):
     created_at: Optional[datetime]=None
     updated_at: Optional[datetime]=None
+    nickname : str = Field(validation_alias=AliasPath("owner","nickname"))
     model_config = ConfigDict(
         populate_by_name=True,
         from_attributes=True
