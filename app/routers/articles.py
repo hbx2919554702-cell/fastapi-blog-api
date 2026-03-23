@@ -30,9 +30,10 @@ def get_articles_id(article_id:int,db:Session = Depends(get_db)):
 def get_articles(page:int=Query(1,ge=1,description="请求的页码从1开始"),
                  limit:int=Query(10,gt=1,le=20,description="每页数量"),
                  keyword:Optional[str]=Query(None,description="搜索文章标题关键字"),
+                 author_id:Optional[int]=None,
                  db:Session = Depends(get_db)):
     skip=(page-1)*limit
-    db_articles = articles.get_articles(skip=skip,limit=limit,keyword=keyword,db=db)
+    db_articles = articles.get_articles(skip=skip,limit=limit,keyword=keyword,db=db,author_id=author_id)
     return db_articles
 
 # 更新文章
