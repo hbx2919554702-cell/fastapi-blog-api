@@ -9,11 +9,13 @@ def get_article_id(db:Session,article_id:int):
            filter(DBArticle.id==article_id).first())
 
 # 查询全部
-def get_articles(db:Session,skip:int=0,limit:int=10,keyword:str=None):
+def get_articles(db:Session,skip:int=0,limit:int=10,keyword:str=None,author_id:str=None):
     get_article_skip=db.query(DBArticle).options(joinedload(DBArticle.owner))
     # 模糊搜索
     if keyword:
         get_article_skip=db.query(DBArticle).filter(DBArticle.title.ilike(f"%{keyword}%"))
+    if author_id:
+        get_article_skip=db.query(DBArticle).filter(DBArticle.author_id==author_id)
     return get_article_skip.offset(skip).limit(limit).all()
 
 # 写入

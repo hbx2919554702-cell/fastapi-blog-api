@@ -19,7 +19,7 @@ def create_user(db:Session,user:UserCreate):
 def get_user_by_username(db:Session,skip:int=0,limit:int=10,keyword:str=None):
     get_user_skip=db.query(DBUser)
     if keyword:
-        get_user_skip=db.query(DBUser).filter(DBUser.username.ilike(f"%{keyword}%"))
+        get_user_skip=db.query(DBUser).filter(DBUser.nickname.ilike(f"%{keyword}%"))
     return get_user_skip.offset(skip).limit(limit).all()
 
 # 登录或注册时是否有同名

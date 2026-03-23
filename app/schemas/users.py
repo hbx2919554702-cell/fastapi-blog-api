@@ -10,7 +10,7 @@ class UserCreate(BaseModel):
 # 返回
 class UserResponse(BaseModel):
     id: int
-    username: str
+    nickname: str
     model_config = ConfigDict(
         populate_by_name=True,  # alise 字段名兼容
         from_attributes=True  # 允许从ORM对象属性中取值
