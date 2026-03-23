@@ -1,6 +1,7 @@
 # 忽略数据库文件（数据留给本地测试，不上传代码库）
 *.db
 *.sqlite3
+*.html
 
 # 忽略 Python 编译产生的缓存文件夹
 __pycache__/
@@ -8,7 +9,8 @@ __pycache__/
 
 # 忽略 PyCharm 自己的配置文件
 .idea/
-
+app/core/security.py
 # 忽略虚拟环境（如果你建了的话）
 venv/
 env/
+alembic/
