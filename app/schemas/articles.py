@@ -16,6 +16,7 @@ class ArticleResponse(ArticleCreate):
     nickname : str = Field(validation_alias=AliasPath("owner","nickname"))
     created_at:Optional[datetime]=None
     updated_at:Optional[datetime]=None
+
     model_config = ConfigDict(
         populate_by_name=True,
         from_attributes=True
@@ -26,6 +27,7 @@ class ArticleDetail(ArticleCreate):
     created_at: Optional[datetime]=None
     updated_at: Optional[datetime]=None
     nickname : str = Field(validation_alias=AliasPath("owner","nickname"))
+
     model_config = ConfigDict(
         populate_by_name=True,
         from_attributes=True
@@ -34,3 +36,16 @@ class ArticleDetail(ArticleCreate):
 # 更新
 class ArticleUpdate(ArticleCreate):
     pass
+
+
+class ArticleShow(BaseModel):
+    id: int
+    title: str
+    content: str
+    updated_at: Optional[datetime]=None
+    nickname : str = Field(validation_alias=AliasPath("owner","nickname"))
+
+    model_config = ConfigDict(
+        populate_by_name=True,
+        from_attributes=True
+    )

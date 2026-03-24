@@ -1,14 +1,26 @@
-from sqlalchemy import Column, Integer, String
-from sqlalchemy.orm import relationship
+from typing import Optional
+from sqlalchemy import Integer, String, Index,ForeignKey
+from sqlalchemy.orm import relationship, Mapped, mapped_column
 from app.database import Base
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from app.models.articles import DBArticle
+    from app.models.favorite import Favorite
 
 class DBUser(Base):
     __tablename__ = 'user'
-    id=Column(Integer,primary_key=True,index=True,comment="用户编号")
-    hashed_password=Column(String(255),nullable=False,comment="用户密码")
-    username=Column(String(50),unique=True,index=True,nullable=False,comment="用户名")
-    email=Column(String(255),nullable=True,comment="电子邮箱(选填)")
-    nickname = Column(String(50), nullable=True,default="匿名用户",comment="昵称")
-    gender = Column(String(10), nullable=True, comment="性别")
-    bio = Column(String(255), nullable=True, default="这个人很懒，什么都没有留下",comment="简介")
-    articles=relationship("DBArticle", back_populates="owner")
+
+    __table_args__ = (
+        Index('username_UNIQUE', 'username', unique=True),
+    )
+
+    id:Mapped[int]=mapped_column(Integer,primary_key=True,autoincrement=True,comment="用户编号")
+    hashed_password:Mapped[str]=mapped_column(String(255),nullable=False,comment="用户密码")
+    username:Mapped[str]=mapped_column(String(50),nullable=False,comment="用户名")
+    email:Mapped[str]=mapped_column(String(255),nullable=True,comment="电子邮箱(选填)")
+    nickname :Mapped[Optional[str]]=mapped_column(String(50),default="匿名用户",comment="昵称")
+    gender:Mapped[Optional[str]]=mapped_column(String(10), nullable=True, comment="性别")
+    bio:Mapped[Optional[str]]=mapped_column(String(255), nullable=True, default="这个人很懒，什么都没有留下",comment="简介")
+    articles:Mapped[list["DBArticle"]]=relationship(back_populates="owner")
+    favorites: Mapped[list["Favorite"]] = relationship(back_populates="user")

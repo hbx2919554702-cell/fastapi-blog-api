@@ -13,4 +13,3 @@ app/core/security.py
 # 忽略虚拟环境（如果你建了的话）
 venv/
 env/
-alembic/

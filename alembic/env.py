@@ -1,13 +1,13 @@
+import asyncio
 from logging.config import fileConfig
-
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
-
 from alembic import context
 
 from app.models.articles import DBArticle
 from app.models.users import DBUser
-from app.database import Base,SQLALCHEMY_DATABASE_URL
+from app.models.favorite import Favorite
+from app.database import Base,SQLALCHEMY_DATABASE_URL,async_engine
 import sys
 import os
 sys.path.append(os.getcwd())
@@ -56,26 +56,31 @@ def run_migrations_offline() -> None:
         context.run_migrations()
 
 
-def run_migrations_online() -> None:
-    """Run migrations in 'online' mode.
-
-    In this scenario we need to create an Engine
-    and associate a connection with the context.
-
-    """
-    connectable = engine_from_config(
-        config.get_section(config.config_ini_section, {}),
-        prefix="sqlalchemy.",
-        poolclass=pool.NullPool,
+def do_run_migrations(connection):
+    """这是一个同步包装函数，用来给下面的 run_sync 调用"""
+    context.configure(
+        connection=connection,
+        target_metadata=target_metadata,
+        render_as_batch=True  # 🌟 帮你保留了这个极其重要的 SQLite 批处理参数！
     )
+    with context.begin_transaction():
+        context.run_migrations()
 
-    with connectable.connect() as connection:
-        context.configure(
-            connection=connection, target_metadata=target_metadata,render_as_batch=True
-        )
+async def run_async_migrations():
+    """真正的全异步执行逻辑"""
+    # 直接使用你 app.database 里的异步引擎 (注意：别忘了在文件顶部 from app.database import engine)
+    connectable = async_engine
 
-        with context.begin_transaction():
-            context.run_migrations()
+    async with connectable.connect() as connection:
+        # 魔法指令：在异步连接中安全地运行同步的迁移逻辑
+        await connection.run_sync(do_run_migrations)
+
+    await connectable.dispose()
+
+def run_migrations_online() -> None:
+    """Run migrations in 'online' mode."""
+    # 用 asyncio 启动异步函数 (注意：别忘了在文件顶部 import asyncio)
+    asyncio.run(run_async_migrations())
 
 
 if context.is_offline_mode():
