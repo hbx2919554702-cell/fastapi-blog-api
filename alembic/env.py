@@ -3,10 +3,11 @@ from logging.config import fileConfig
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 from alembic import context
-
+# 触发 __init__.py，一次性把所有模型都加载并注册到 Base.metadata
 from app.models.articles import DBArticle
 from app.models.users import DBUser
 from app.models.favorite import Favorite
+from app.models.comment import Comment
 from app.database import Base,SQLALCHEMY_DATABASE_URL,async_engine
 import sys
 import os

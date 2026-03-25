@@ -16,7 +16,7 @@ class FavoriteAddRequest(BaseModel):
 class FavoriteDeleteRequest(BaseModel):
     article_id: int = Field(..., alias="articleId")
 
-
+# 封装响应数据
 class FavoriteArticleResponse(ArticleShow):
     favorite_id: int = Field(...,alias="favoriteId")
     favorite_at:datetime=Field(...,alias="favoriteAt")

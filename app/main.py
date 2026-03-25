@@ -1,7 +1,8 @@
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI
 from fastapi.responses  import RedirectResponse
-from app.routers import articles,users,favorite
+from app.routers import articles, users, favorite, comment
+
 app = FastAPI()
 
 app.add_middleware(
@@ -20,3 +21,4 @@ def read_root():
 app.include_router(articles.router)
 app.include_router(users.router)
 app.include_router(favorite.router)
+app.include_router(comment.router)

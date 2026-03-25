@@ -1,5 +1,5 @@
 from typing import Optional
-from sqlalchemy import Integer, String, Index,ForeignKey
+from sqlalchemy import Integer, String, Index
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from app.database import Base
 from typing import TYPE_CHECKING
@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from app.models.articles import DBArticle
     from app.models.favorite import Favorite
+    from app.models.comment import Comment
 
 class DBUser(Base):
     __tablename__ = 'user'
@@ -24,3 +25,4 @@ class DBUser(Base):
     bio:Mapped[Optional[str]]=mapped_column(String(255), nullable=True, default="这个人很懒，什么都没有留下",comment="简介")
     articles:Mapped[list["DBArticle"]]=relationship(back_populates="owner")
     favorites: Mapped[list["Favorite"]] = relationship(back_populates="user")
+    comments:Mapped[list["Comment"]] = relationship(back_populates="user")
