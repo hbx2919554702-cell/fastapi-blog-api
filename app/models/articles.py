@@ -19,5 +19,5 @@ class DBArticle(Base):
     updated_at:Mapped[datetime]=mapped_column(DateTime, default=func.now(), onupdate=func.now(), comment="更新时间")
     author_id:Mapped[int]=mapped_column(Integer, ForeignKey("user.id"),comment="作者")
     owner:Mapped["DBUser"]=relationship( back_populates="articles")
-    favorites: Mapped[list["Favorite"]] = relationship(back_populates="article")
-    comments:Mapped[list["Comment"]] = relationship(back_populates="article")
+    favorites: Mapped[list["Favorite"]] = relationship(back_populates="article",cascade="all, delete-orphan")
+    comments:Mapped[list["Comment"]] = relationship(back_populates="article",cascade="all, delete-orphan")
