@@ -1,12 +1,9 @@
-from dataclasses import Field
-
 from fastapi import APIRouter, Depends, Query, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.depends import get_current_user
 from app.core.response import success_response
-from app.crud.favorite import is_article_favorite, add_article_favorite, get_favorite_list, delete_favorite_list
+from app.crud.favorite import is_article_favorite, add_article_favorite, get_favorite_list, delete_favorite_list,delete_article_favorite
 from app.database import get_db
-from app.models import articles
 from app.models.users import DBUser
 from app.schemas.favorite import FavoriteResponse, FavoriteAddRequest, FavoriteDeleteRequest, FavoriteListResponse
 
@@ -26,6 +23,8 @@ async def add_favorite(data:FavoriteAddRequest,
                        db : AsyncSession=Depends(get_db),
                        user :DBUser=Depends(get_current_user)):
     add= await add_article_favorite(db=db,article_id=data.article_id,user_id=user.id)
+    if add is None:
+        raise HTTPException(status_code=404,detail="文章不存在，无法收藏")
     return success_response(message="收藏成功",data=add)
 
 
@@ -34,7 +33,7 @@ async def add_favorite(data:FavoriteAddRequest,
 async def delete_favorite(data:FavoriteDeleteRequest,
                           db : AsyncSession=Depends(get_db),
                           user :DBUser=Depends(get_current_user)):
-    delete = await delete_favorite(db=db, user_id=user.id, article_id=data.article_id)
+    delete = await delete_article_favorite(db=db, user_id=user.id, article_id=data.article_id)
     if not delete:
         raise HTTPException(status_code=404,detail="收藏记录不存在")
     return success_response(message="取消收藏成功")
@@ -56,6 +55,7 @@ async def get_list_favorite(page:int=Query(1,ge=1,description="请求的页码�
     data=FavoriteListResponse(list=favorite_list,total=total,hasMore=has_more)
     return success_response(message="获取收藏列表成功",data=data)
 
+# 清空收藏列表
 @router.delete("/list_delete")
 async def get_list_delete(
                       db:AsyncSession=Depends(get_db),

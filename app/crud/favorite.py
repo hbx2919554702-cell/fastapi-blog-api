@@ -15,6 +15,10 @@ async def is_article_favorite(db: AsyncSession, user_id:int, article_id: int):
 
 # 用户添加收藏文章
 async def add_article_favorite(db: AsyncSession,user_id: int,article_id:int):
+    result=await db.execute(select(DBArticle).where(DBArticle.id==article_id))
+    article=result.scalar_one_or_none()
+    if not article:
+        return None
     favorite= Favorite(user_id=user_id, article_id=article_id)
     db.add(favorite)
     await db.commit()
@@ -49,6 +53,7 @@ async def get_favorite_list(db:AsyncSession, user_id:int, page:int=1, limit:int=
     rows=result.all()
     return total,rows
 
+# 清除收藏列表
 async def delete_favorite_list (db:AsyncSession, user_id:int):
     favorite=delete(Favorite).where(Favorite.user_id==user_id)
     result = await db.execute(favorite)
