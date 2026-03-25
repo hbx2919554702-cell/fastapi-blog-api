@@ -1,5 +1,5 @@
 from datetime import datetime
-from sqlalchemy import select
+from sqlalchemy import select,delete
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 from app.models.articles import DBArticle
@@ -33,15 +33,11 @@ async def create_article(db:AsyncSession,article:ArticleCreate,author_id: int):
     return db_article
 
 # 删除
-async def delete_article(db:AsyncSession,article_id:int):
-    db_article=select(DBArticle).filter(DBArticle.id==article_id)
+async def delete_article(db:AsyncSession,article_id:int,uer_id:int):
+    db_article=delete(DBArticle).where(DBArticle.id==article_id,DBArticle.author_id==uer_id)
     result=await db.execute(db_article)
-    db_article=result.scalar_one_or_none()
-    if db_article:
-       await db.delete(db_article)
-       await db.commit()
-       return True
-    return False
+    await db.commit()
+    return result.rowcount>0
 
 # 更新
 async def update_article(db:AsyncSession,db_article:DBArticle,update_article:ArticleUpdate):

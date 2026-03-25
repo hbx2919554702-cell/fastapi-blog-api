@@ -52,9 +52,7 @@ async def update_article(article_id:int,article: ArticleUpdate,
 async def delete_article(article_id:int,db:AsyncSession= Depends(get_db),
                    current_user=Depends(get_current_user)):
     db_article=await crud_articles.get_article_id(article_id=article_id, db=db)
-    if db_article is None:
-        raise HTTPException(status_code=404,detail="文章不存在")
-    if db_article.author_id != current_user.id:
-        raise HTTPException(status_code=403,detail="你无法删除该文章")
-    await crud_articles.delete_article(article_id=article_id,db=db)
+    if not db_article:
+        raise HTTPException(status_code=404,detail="删除文章失败")
+    await crud_articles.delete_article(article_id=article_id,db=db,uer_id=current_user.id)
     return {"message":f"ID为{article_id}的文章删除成功"}
