@@ -4,6 +4,7 @@ from sqlalchemy.orm import joinedload
 from app.models.articles import DBArticle
 from app.models.comment import Comment
 
+
 # 发表评论
 async def add_comment(db:AsyncSession, user_id:int,article_id: int,comment:str):
     result = await db.execute(select(DBArticle).where(DBArticle.id == article_id))
@@ -16,6 +17,7 @@ async def add_comment(db:AsyncSession, user_id:int,article_id: int,comment:str):
     await db.commit()
     await db.refresh(new_comment)
     return new_comment
+
 
 # 查看评论
 async def get_comment_list(db:AsyncSession,article_id:int,page:int=1,limit:int=20):
@@ -34,14 +36,13 @@ async def get_comment_list(db:AsyncSession,article_id:int,page:int=1,limit:int=2
     rows=result.scalars().all()
     return rows,total
 
+
 # 删除个人评论
 async def delete_user_comment(db:AsyncSession,user_id:int,comment_id:int):
     comment = delete(Comment).where(Comment.id == comment_id,Comment.user_id == user_id)
     result = await db.execute(comment)
     await db.commit()
     return result.rowcount>0
-
-
 
 
 # 文章作者删除相关文章的评论
