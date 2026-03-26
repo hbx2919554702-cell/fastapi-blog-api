@@ -2,6 +2,7 @@
 *.db
 *.sqlite3
 *.html
+*.docx
 
 # 忽略 Python 编译产生的缓存文件夹
 __pycache__/
