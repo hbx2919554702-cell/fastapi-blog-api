@@ -53,6 +53,7 @@ async def get_favorite_list(db:AsyncSession, user_id:int, page:int=1, limit:int=
     rows=result.all()
     return total,rows
 
+
 # 清除收藏列表
 async def delete_favorite_list (db:AsyncSession, user_id:int):
     favorite=delete(Favorite).where(Favorite.user_id==user_id)

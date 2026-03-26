@@ -5,7 +5,7 @@ from app.core.response import success_response
 from app.crud.favorite import is_article_favorite, add_article_favorite, get_favorite_list, delete_favorite_list,delete_article_favorite
 from app.database import get_db
 from app.models.users import DBUser
-from app.schemas.favorite import FavoriteResponse, FavoriteAddRequest, FavoriteDeleteRequest, FavoriteListResponse
+from app.schemas.favorite import FavoriteResponse,  FavoriteDeleteRequest, FavoriteListResponse
 
 router = APIRouter(prefix="/api/favorite", tags=["favorite"])
 
@@ -19,10 +19,10 @@ async def check_favorite(article_id: int=Query(...,alias="article_id"),
 
 # 添加收藏
 @router.post("/add_favorite")
-async def add_favorite(data:FavoriteAddRequest,
+async def add_favorite(article_id: int=Query(...,alias="article_id"),
                        db : AsyncSession=Depends(get_db),
                        user :DBUser=Depends(get_current_user)):
-    add= await add_article_favorite(db=db,article_id=data.article_id,user_id=user.id)
+    add= await add_article_favorite(db=db,article_id=article_id,user_id=user.id)
     if add is None:
         raise HTTPException(status_code=404,detail="文章不存在，无法收藏")
     return success_response(message="收藏成功",data=add)
