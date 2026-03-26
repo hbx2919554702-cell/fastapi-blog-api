@@ -1,10 +1,13 @@
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.core.depends import get_current_user
+from app.core.depends import get_current_user, get_current_user_optional
+from app.core.response import success_response
+from app.crud.history import add_history
 from app.database import get_db
 from app.schemas.articles import ArticleCreate, ArticleUpdate, ArticleResponse, ArticleDetail
 from app.crud import articles as crud_articles
+
 router = APIRouter(prefix="/api/articles", tags=["articles"])
 
 # 创建文章
@@ -16,12 +19,16 @@ async def create_article(article:ArticleCreate,
 
 
 # 根据id搜索文章
-@router.get("/get_articles_id/{article_id}", response_model=ArticleDetail)
-async def get_articles_id(article_id:int,db:AsyncSession = Depends(get_db)):
+@router.get("/get_articles_id/{article_id}")
+async def get_articles_id(article_id:int,db:AsyncSession = Depends(get_db),current_user=Depends(get_current_user_optional)):
     db_article_id = await crud_articles.get_article_id(article_id=article_id,db=db)
     if db_article_id is None:
         raise HTTPException(status_code=404,detail='文章不存在')
-    return db_article_id
+    data=ArticleDetail.model_validate(db_article_id)
+    if current_user:
+        await add_history(db=db,article_id=article_id,user_id=current_user.id)
+    return success_response(message="查询成功",data=data)
+
 
 # 模糊搜索
 @router.get("/get_articles", response_model=List[ArticleResponse])
@@ -55,4 +62,4 @@ async def delete_article(article_id:int,db:AsyncSession= Depends(get_db),
     if not db_article:
         raise HTTPException(status_code=404,detail="删除文章失败")
     await crud_articles.delete_article(article_id=article_id,db=db,uer_id=current_user.id)
-    return {"message":f"ID为{article_id}的文章删除成功"}
+    return success_response(message=f"ID为{article_id}的文章删除成功")

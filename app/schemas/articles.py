@@ -16,7 +16,7 @@ class ArticleResponse(ArticleCreate):
     nickname : str = Field(validation_alias=AliasPath("owner","nickname"))
     created_at:Optional[datetime]=None
     updated_at:Optional[datetime]=None
-
+    view_count:int
     model_config = ConfigDict(
         populate_by_name=True,
         from_attributes=True
@@ -27,11 +27,13 @@ class ArticleDetail(ArticleCreate):
     created_at: Optional[datetime]=None
     updated_at: Optional[datetime]=None
     nickname : str = Field(validation_alias=AliasPath("owner","nickname"))
+    view_count: int
 
     model_config = ConfigDict(
         populate_by_name=True,
         from_attributes=True
     )
+
 
 # 更新
 class ArticleUpdate(ArticleCreate):
@@ -44,6 +46,7 @@ class ArticleShow(BaseModel):
     content: str
     updated_at: Optional[datetime]=None
     nickname : str = Field(validation_alias=AliasPath("owner","nickname"))
+    view_count: int
 
     model_config = ConfigDict(
         populate_by_name=True,

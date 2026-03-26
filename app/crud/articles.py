@@ -1,5 +1,5 @@
 from datetime import datetime
-from sqlalchemy import select,delete
+from sqlalchemy import select, delete, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 from app.models.articles import DBArticle
@@ -8,18 +8,26 @@ from app.schemas.articles import ArticleUpdate ,ArticleCreate
 # 根据id查询
 async def get_article_id(db:AsyncSession,article_id:int):
     db_article=(select(DBArticle).options(joinedload(DBArticle.owner)).
-                filter(DBArticle.id == article_id))
+                where(DBArticle.id == article_id))
     result = await db.execute(db_article)
-    return result.scalar_one_or_none()
+    article = result.scalar_one_or_none()
+
+    if not article:
+        return None
+    stmt = (update(DBArticle).where(DBArticle.id == article_id).values(view_count=DBArticle.view_count + 1))
+    await db.execute(stmt)
+    await db.commit()
+    await db.refresh(article)
+    return article
 
 # 查询全部
 async def get_articles(db:AsyncSession,skip:int=0,limit:int=10,keyword:str=None,author_id:str=None):
     get_article_skip=select(DBArticle).options(joinedload(DBArticle.owner))
     # 模糊搜索
     if keyword:
-        get_article_skip=get_article_skip.filter(DBArticle.title.ilike(f"%{keyword}%"))
+        get_article_skip=get_article_skip.where(DBArticle.title.ilike(f"%{keyword}%"))
     if author_id:
-        get_article_skip=get_article_skip.filter(DBArticle.author_id==author_id)
+        get_article_skip=get_article_skip.where(DBArticle.author_id==author_id)
     get_article_skip.offset(skip).limit(limit)
     result = await db.execute(get_article_skip)
     return result.scalars().unique().all()
