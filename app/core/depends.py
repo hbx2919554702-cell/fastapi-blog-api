@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.crud.users import get_users
 from app.database import get_db
 from app.core.config import SECRET_KEY,ALGORITHM
-oauth2_scheme=OAuth2PasswordBearer(tokenUrl="/api/users/login")
+oauth2_scheme=OAuth2PasswordBearer(tokenUrl="/api/users/login",auto_error=False )
 async def get_current_user(token: str = Depends(oauth2_scheme),
                      db: AsyncSession=Depends(get_db)):
     try:
@@ -30,3 +30,23 @@ async def get_current_user(token: str = Depends(oauth2_scheme),
     return user
 
 
+
+# 可选登录依赖
+oauth2_scheme_optional = OAuth2PasswordBearer(tokenUrl="/api/users/login", auto_error=False)
+async def get_current_user_optional(
+        token: str | None = Depends(oauth2_scheme_optional),
+        db: AsyncSession = Depends(get_db)
+):
+    if not token:
+        return None
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+        if username is None:
+            return None
+    except JWTError:
+        return None
+    user = await get_users(db=db, username=username)
+    if user is None:
+        return None
+    return user
