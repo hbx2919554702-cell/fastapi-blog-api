@@ -8,6 +8,7 @@ if TYPE_CHECKING:
     from app.models.articles import DBArticle
     from app.models.favorite import Favorite
     from app.models.comment import Comment
+    from app.models.history import History
 
 class DBUser(Base):
     __tablename__ = 'user'
@@ -26,3 +27,4 @@ class DBUser(Base):
     articles:Mapped[list["DBArticle"]]=relationship(back_populates="owner")
     favorites: Mapped[list["Favorite"]] = relationship(back_populates="user")
     comments:Mapped[list["Comment"]] = relationship(back_populates="user")
+    history: Mapped[list["History"]] = relationship(back_populates="user")
