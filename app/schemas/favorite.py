@@ -8,10 +8,6 @@ from app.schemas.articles import ArticleShow
 class FavoriteResponse(BaseModel):
     is_favorite: bool=Field(...,alias="isFavorite")
 
-# 删除收藏请求
-class FavoriteDeleteRequest(BaseModel):
-    article_id: int = Field(..., alias="articleId")
-
 # 封装响应数据
 class FavoriteArticleResponse(ArticleShow):
     favorite_id: int = Field(...,alias="favoriteId")
