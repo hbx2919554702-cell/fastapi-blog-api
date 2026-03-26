@@ -8,6 +8,7 @@ from app.models.articles import DBArticle
 from app.models.users import DBUser
 from app.models.favorite import Favorite
 from app.models.comment import Comment
+from app.models.history import History
 from app.database import Base,SQLALCHEMY_DATABASE_URL,async_engine
 import sys
 import os
