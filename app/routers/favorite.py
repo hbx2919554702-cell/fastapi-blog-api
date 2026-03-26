@@ -5,7 +5,7 @@ from app.core.response import success_response
 from app.crud.favorite import is_article_favorite, add_article_favorite, get_favorite_list, delete_favorite_list,delete_article_favorite
 from app.database import get_db
 from app.models.users import DBUser
-from app.schemas.favorite import FavoriteResponse,  FavoriteDeleteRequest, FavoriteListResponse
+from app.schemas.favorite import FavoriteResponse, FavoriteListResponse
 
 router = APIRouter(prefix="/api/favorite", tags=["favorite"])
 
@@ -30,10 +30,10 @@ async def add_favorite(article_id: int=Query(...,alias="article_id"),
 
 # 删除收藏
 @router.delete("/delete_favorite")
-async def delete_favorite(data:FavoriteDeleteRequest,
+async def delete_favorite(article_id: int=Query(...,alias="article_id"),
                           db : AsyncSession=Depends(get_db),
                           user :DBUser=Depends(get_current_user)):
-    delete = await delete_article_favorite(db=db, user_id=user.id, article_id=data.article_id)
+    delete = await delete_article_favorite(db=db, user_id=user.id, article_id=article_id)
     if not delete:
         raise HTTPException(status_code=404,detail="收藏记录不存在")
     return success_response(message="取消收藏成功")
