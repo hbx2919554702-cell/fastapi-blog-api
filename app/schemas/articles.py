@@ -47,6 +47,7 @@ class ArticleShow(BaseModel):
     id: int
     title: str
     content: str
+    created_at: Optional[datetime] = None
     updated_at: Optional[datetime]=None
     nickname : str = Field(validation_alias=AliasPath("owner","nickname"))
     view_count: int

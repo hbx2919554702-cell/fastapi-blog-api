@@ -4,7 +4,6 @@ from sqlalchemy.orm import joinedload
 from app.models.articles import DBArticle
 from app.models.comment import Comment
 
-
 # 发表评论
 async def add_comment(db:AsyncSession, user_id:int,article_id: int,comment:str):
     result = await db.execute(select(DBArticle).where(DBArticle.id == article_id))

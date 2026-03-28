@@ -54,7 +54,7 @@ async def delete_comments_user(comment_id: int,
                           user: DBUser = Depends(get_current_user)):
     delete=await delete_user_comment(db=db,user_id=user.id,comment_id=comment_id)
     if  not delete:
-        raise HTTPException(status_code=404,detail="删除失败")
+        raise HTTPException(status_code=403,detail="删除失败")
     return success_response(message="成功删除该评论")
 
 
@@ -65,5 +65,5 @@ async def delete_comments_article(comment_id: int,
                                   user: DBUser = Depends(get_current_user)):
     result = await delete_article_comment(db=db,user_id=user.id,comment_id=comment_id)
     if not result:
-        raise HTTPException(status_code=401,detail="你无法删除该评论")
+        raise HTTPException(status_code=403,detail="你无法删除该评论")
     return success_response(message="成功删除该评论")
