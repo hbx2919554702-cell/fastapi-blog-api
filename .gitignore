@@ -3,7 +3,7 @@
 *.sqlite3
 *.html
 *.docx
-
+*.md
 # 忽略 Python 编译产生的缓存文件夹
 __pycache__/
 *.py[cod]

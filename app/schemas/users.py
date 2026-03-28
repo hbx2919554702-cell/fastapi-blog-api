@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field, ConfigDict
 #创建用户
 class UserCreate(BaseModel):
     username: str=Field(min_length=2,max_length=50,description="用户名要求3到50个字符",json_schema_extra={"example": ""})
-    password: str=Field(max_length=6,description="密码至少6位",json_schema_extra={"example": ""})
+    password: str=Field(min_length=6,description="密码至少6位",json_schema_extra={"example": ""})
 
 # 返回
 class UserResponse(BaseModel):
