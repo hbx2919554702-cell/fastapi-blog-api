@@ -3,14 +3,15 @@ from fastapi import Depends, HTTPException,status
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt,JWTError
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.core.config import settings
 from app.crud.users import get_users
 from app.database import get_db
-from app.core.config import SECRET_KEY,ALGORITHM
-oauth2_scheme=OAuth2PasswordBearer(tokenUrl="/api/users/login",auto_error=False )
+oauth2_scheme=OAuth2PasswordBearer(tokenUrl="/api/users/login" )
 async def get_current_user(token: str = Depends(oauth2_scheme),
                      db: AsyncSession=Depends(get_db)):
     try:
-        payload=jwt.decode(token,SECRET_KEY,algorithms=[ALGORITHM])
+        payload=jwt.decode(token,settings.SECRET_KEY,algorithms=[settings.ALGORITHM])
         username: str = payload.get("sub")
         if username is None:
             raise HTTPException(
@@ -40,7 +41,7 @@ async def get_current_user_optional(
     if not token:
         return None
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
         username: str = payload.get("sub")
         if username is None:
             return None

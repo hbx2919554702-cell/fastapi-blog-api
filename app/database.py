@@ -1,14 +1,18 @@
 import os
-from sqlalchemy import create_engine,Column,Integer,String
 from sqlalchemy.orm import sessionmaker,declarative_base
 from sqlalchemy import MetaData
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
+from app.core.config import settings
 # 1. 配置数据库地址：这就相当于你的 SQL Server 连接字符串
 # sqlite:///./blog.db 意思是：在当前目录下，给我建一个名叫 blog.db 的文件当数据库
-current_dir = os.path.dirname(os.path.abspath(__file__))   #获取当前文件路径
-root_dir = os.path.dirname(current_dir)                   #获得上一级目录路径
-DB_PATH = os.path.join(root_dir, "blog.db")               #找到该路径的blog.db文件
-SQLALCHEMY_DATABASE_URL = f"sqlite+aiosqlite:///{DB_PATH}"        #连接blog数据库
+if settings.DATABASE_URL.startswith("sqlite"):
+    current_dir = os.path.dirname(os.path.abspath(__file__))   #获取当前文件路径
+    root_dir = os.path.dirname(current_dir)                   #获得上一级目录路径
+    DB_PATH = os.path.join(root_dir, "blog.db")               #找到该路径的blog.db文件
+    SQLALCHEMY_DATABASE_URL = f"sqlite+aiosqlite:///{DB_PATH}"        #连接blog数据库
+else:
+    # 如果以后换成 MySQL/PostgreSQL，就直接用 env 里的配置
+    SQLALCHEMY_DATABASE_URL = settings.DATABASE_URL
 
 # 创建和数据库沟通的引擎，解决并发冲突
 async_engine=create_async_engine(
