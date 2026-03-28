@@ -5,7 +5,7 @@ from app.core.depends import get_current_user, get_current_user_optional
 from app.core.response import success_response
 from app.crud.history import add_history
 from app.database import get_db
-from app.schemas.articles import ArticleCreate, ArticleUpdate, ArticleResponse, ArticleDetail
+from app.schemas.articles import ArticleCreate, ArticleUpdate, ArticleResponse, ArticleDetail, ArticleShow
 from app.crud import articles as crud_articles
 
 router = APIRouter(prefix="/api/articles", tags=["articles"])
@@ -16,7 +16,8 @@ async def create_article(article:ArticleCreate,
                    db:AsyncSession= Depends(get_db),
                    current_user=Depends(get_current_user)):
     data= await crud_articles.create_article(db=db,article=article,author_id=current_user.id)
-    return success_response(message="创建成功",data=data)
+    safe_data = ArticleShow.model_validate(data).model_dump()
+    return success_response(message="创建成功",data=safe_data)
 
 # 根据id搜索文章
 @router.get("/get_articles_id/{article_id}")
@@ -35,10 +36,10 @@ async def get_articles_id(article_id:int,db:AsyncSession = Depends(get_db),curre
 async def get_articles(page:int=Query(1,ge=1,description="请求的页码从1开始"),
                  limit:int=Query(10,gt=1,le=20,description="每页数量"),
                  keyword:Optional[str]=Query(None,description="搜索文章标题关键字"),
-                 author_id:Optional[int]=None,
+                 author_nickname: Optional[str] = Query(None, description="搜索作者昵称"),
                  db:AsyncSession = Depends(get_db)):
     skip=(page-1)*limit
-    db_articles = await crud_articles.get_articles(skip=skip,limit=limit,keyword=keyword,db=db,author_id=author_id)
+    db_articles = await crud_articles.get_articles(skip=skip,limit=limit,keyword=keyword,db=db,author_nickname=author_nickname)
     data = [ArticleResponse.model_validate(article) for article in db_articles]
     return success_response(message="查询成功",data=data)
 
@@ -53,15 +54,18 @@ async def update_article(article_id:int,article: ArticleUpdate,
     if db_article.author_id != current_user.id:
         raise HTTPException(status_code=403,detail="无法更改文章")
     update_article=await crud_articles.update_article(db_article=db_article,update_article=article,db=db)
-    data=ArticleUpdate.model_validate(update_article)
+    data = ArticleShow.model_validate(update_article).model_dump()
     return success_response(message="修改成功",data=data)
 
 # 删除文章
 @router.delete("/delete/{article_id}")
 async def delete_article(article_id:int,db:AsyncSession= Depends(get_db),
                    current_user=Depends(get_current_user)):
-    db_article=await crud_articles.get_article_id(article_id=article_id, db=db)
+    db_article = await crud_articles.get_article_id(article_id=article_id, db=db)
     if not db_article:
-        raise HTTPException(status_code=404,detail="删除文章失败")
-    await crud_articles.delete_article(article_id=article_id,db=db,uer_id=current_user.id)
+        raise HTTPException(status_code=404, detail="文章不存在")
+
+    delete_result = await crud_articles.delete_article(db=db, article_id=article_id, uer_id=current_user.id)
+    if not delete_result:
+        raise HTTPException(status_code=403, detail="越权操作：你无权删除他人的文章！")
     return success_response(message=f"ID为{article_id}的文章删除成功")
