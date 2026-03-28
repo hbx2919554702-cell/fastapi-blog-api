@@ -31,12 +31,12 @@ async def get_users(db:AsyncSession,username:str):
     return result.scalar_one_or_none()
 
 # 修改个人信息
-async def update_user(db:AsyncSession,username:str,update_user=UserUpdateRequest):
+async def update_user(db:AsyncSession,username:str,update_user:UserUpdateRequest):
     update_dict=update_user.model_dump(exclude_unset=True,exclude_none=True)
     if not update_dict:
         return await get_users(db,username)
     query=update(DBUser).where(DBUser.username==username).values(**update_dict)
-    result=db.execute(query)
+    result=await db.execute(query)
     await db.commit()
 
     if result.rowcount==0:
