@@ -11,12 +11,12 @@ from app.crud import articles as crud_articles
 router = APIRouter(prefix="/api/articles", tags=["articles"])
 
 # 创建文章
-@router.post("/create", response_model=ArticleResponse)
+@router.post("/create")
 async def create_article(article:ArticleCreate,
                    db:AsyncSession= Depends(get_db),
                    current_user=Depends(get_current_user)):
-    return await crud_articles.create_article(db=db,article=article,author_id=current_user.id)
-
+    data= await crud_articles.create_article(db=db,article=article,author_id=current_user.id)
+    return success_response(message="创建成功",data=data)
 
 # 根据id搜索文章
 @router.get("/get_articles_id/{article_id}")
@@ -31,7 +31,7 @@ async def get_articles_id(article_id:int,db:AsyncSession = Depends(get_db),curre
 
 
 # 模糊搜索
-@router.get("/get_articles", response_model=List[ArticleResponse])
+@router.get("/get_articles")
 async def get_articles(page:int=Query(1,ge=1,description="请求的页码从1开始"),
                  limit:int=Query(10,gt=1,le=20,description="每页数量"),
                  keyword:Optional[str]=Query(None,description="搜索文章标题关键字"),
@@ -39,10 +39,11 @@ async def get_articles(page:int=Query(1,ge=1,description="请求的页码从1开
                  db:AsyncSession = Depends(get_db)):
     skip=(page-1)*limit
     db_articles = await crud_articles.get_articles(skip=skip,limit=limit,keyword=keyword,db=db,author_id=author_id)
-    return db_articles
+    data = [ArticleResponse.model_validate(article) for article in db_articles]
+    return success_response(message="查询成功",data=data)
 
 # 更新文章
-@router.put("/update/{article_id}", response_model=ArticleUpdate)
+@router.put("/update/{article_id}")
 async def update_article(article_id:int,article: ArticleUpdate,
                    db:AsyncSession = Depends(get_db),
                    current_user=Depends(get_current_user)):
@@ -52,7 +53,8 @@ async def update_article(article_id:int,article: ArticleUpdate,
     if db_article.author_id != current_user.id:
         raise HTTPException(status_code=403,detail="无法更改文章")
     update_article=await crud_articles.update_article(db_article=db_article,update_article=article,db=db)
-    return update_article
+    data=ArticleUpdate.model_validate(update_article)
+    return success_response(message="修改成功",data=data)
 
 # 删除文章
 @router.delete("/delete/{article_id}")

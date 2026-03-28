@@ -13,6 +13,7 @@ class ArticleCreate(BaseModel):
 # 查所有文章
 class ArticleResponse(ArticleCreate):
     id:int
+    author_id:int
     nickname : str = Field(validation_alias=AliasPath("owner","nickname"))
     created_at:Optional[datetime]=None
     updated_at:Optional[datetime]=None
@@ -24,6 +25,8 @@ class ArticleResponse(ArticleCreate):
 
 # 根据文章id查文章
 class ArticleDetail(ArticleCreate):
+    id: int
+    author_id: int
     created_at: Optional[datetime]=None
     updated_at: Optional[datetime]=None
     nickname : str = Field(validation_alias=AliasPath("owner","nickname"))
