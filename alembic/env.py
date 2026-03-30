@@ -1,22 +1,29 @@
 import asyncio
 from logging.config import fileConfig
-from sqlalchemy import engine_from_config
+import sys
+import os
+
+#路径追加必须放在最前面，确保能找到 app 目
+sys.path.append(os.getcwd())
+
 from sqlalchemy import pool
 from alembic import context
+from sqlalchemy.ext.asyncio import async_engine_from_config
+
+from app.core.config import settings
 # 触发 __init__.py，一次性把所有模型都加载并注册到 Base.metadata
 from app.models.articles import DBArticle
 from app.models.users import DBUser
 from app.models.favorite import Favorite
 from app.models.comment import Comment
 from app.models.history import History
-from app.database import Base,SQLALCHEMY_DATABASE_URL,async_engine
-import sys
-import os
+from app.database import Base
+
 sys.path.append(os.getcwd())
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
-config.set_main_option("sqlalchemy.url", SQLALCHEMY_DATABASE_URL)
+config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
 if config.config_file_name is not None:
@@ -46,7 +53,7 @@ def run_migrations_offline() -> None:
     script output.
 
     """
-    url = config.get_main_option("sqlalchemy.url")
+    url =settings.DATABASE_URL
     context.configure(
         url=url,
         target_metadata=target_metadata,
@@ -62,26 +69,29 @@ def do_run_migrations(connection):
     """这是一个同步包装函数，用来给下面的 run_sync 调用"""
     context.configure(
         connection=connection,
-        target_metadata=target_metadata,
-        render_as_batch=True  # 🌟 帮你保留了这个极其重要的 SQLite 批处理参数！
+        target_metadata=target_metadata
     )
     with context.begin_transaction():
         context.run_migrations()
 
 async def run_async_migrations():
     """真正的全异步执行逻辑"""
-    # 直接使用你 app.database 里的异步引擎 (注意：别忘了在文件顶部 from app.database import engine)
-    connectable = async_engine
+    # 从配置创建异步引擎，迁移时建议使用 NullPool 避免连接冲突
+    connectable = async_engine_from_config(
+        config.get_section(config.config_ini_section),
+        prefix="sqlalchemy.",
+        poolclass=pool.NullPool,
+    )
 
     async with connectable.connect() as connection:
-        # 魔法指令：在异步连接中安全地运行同步的迁移逻辑
+        # 在异步连接中安全地运行同步的迁移逻辑
         await connection.run_sync(do_run_migrations)
 
     await connectable.dispose()
 
 def run_migrations_online() -> None:
     """Run migrations in 'online' mode."""
-    # 用 asyncio 启动异步函数 (注意：别忘了在文件顶部 import asyncio)
+    # 用 asyncio 启动异步函数
     asyncio.run(run_async_migrations())
 
 
