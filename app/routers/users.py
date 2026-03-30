@@ -72,6 +72,6 @@ async def update_user_info(user_data:UserUpdateRequest,current_user: DBUser=Depe
 async def update_user_password(password:UserPassword,current_user: DBUser=Depends(get_current_user),
                          db:AsyncSession=Depends(get_db)):
     updated_password=await update_password(new_password=password.new_password,old_password=password.old_password,user=current_user,db=db)
-    if updated_password is None:
-        raise HTTPException(status_code=500,detail="密码更新失败")
+    if not updated_password:
+        raise HTTPException(status_code=500,detail="旧密码错误")
     return success_response(message="密码修改成功")
