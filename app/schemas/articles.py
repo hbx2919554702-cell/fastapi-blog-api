@@ -7,7 +7,7 @@ from pydantic import BaseModel, Field, ConfigDict,AliasPath
 
 # 创建文章
 class ArticleCreate(BaseModel):
-    title: str=Field(min_length=2,max_length=15,description="文章名要求2到15个字符",json_schema_extra={"example": ""})
+    title: str=Field(min_length=2,max_length=25,description="文章名要求2到25个字符",json_schema_extra={"example": ""})
     content: str=Field(min_length=1,description="文章内容不能为空",json_schema_extra={"example": ""})
 
 # 查所有文章
