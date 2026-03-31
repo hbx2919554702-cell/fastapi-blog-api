@@ -24,14 +24,16 @@ async def get_article_id(db:AsyncSession,article_id:int):
     return article
 
 # 查询全部
-async def get_articles(db:AsyncSession,skip:int=0,limit:int=10,keyword:str=None,author_nickname: str = None):
+async def get_articles(db:AsyncSession,skip:int=0,limit:int=10,keyword:str=None,author_nickname: str = None,author_id: int = None):
     get_article_skip = select(DBArticle).join(DBArticle.owner).options(joinedload(DBArticle.owner))
     # 模糊搜索
     if keyword:
         get_article_skip=get_article_skip.where(DBArticle.title.ilike(f"%{keyword}%"))
     if author_nickname:
         get_article_skip = get_article_skip.where(DBUser.nickname.ilike(f"%{author_nickname}%"))
-    get_article_skip.offset(skip).limit(limit)
+    if author_id is not None:
+        get_article_skip = get_article_skip.where(DBArticle.author_id == author_id)
+    get_article_skip=get_article_skip.offset(skip).limit(limit).order_by(DBArticle.created_at.desc())
     result = await db.execute(get_article_skip)
     return result.scalars().unique().all()
 
