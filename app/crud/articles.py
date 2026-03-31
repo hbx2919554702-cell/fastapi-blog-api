@@ -1,9 +1,11 @@
+import json
 from sqlalchemy import select, delete, update, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
+from app.cache.articles import get_cached_articles,set_cached_articles
 from app.models.articles import DBArticle
 from app.models.users import DBUser
-from app.schemas.articles import ArticleUpdate ,ArticleCreate
+from app.schemas.articles import ArticleUpdate, ArticleCreate, ArticleResponse
 from app.models.comment import Comment
 from app.models.favorite import Favorite
 from app.models.history import History
@@ -24,7 +26,13 @@ async def get_article_id(db:AsyncSession,article_id:int):
     return article
 
 # 查询全部
-async def get_articles(db:AsyncSession,skip:int=0,limit:int=10,keyword:str=None,author_nickname: str = None,author_id: int = None):
+async def get_articles(db:AsyncSession,page:int=1,limit:int=10,keyword:str=None,author_nickname: str = None,author_id: int = None):
+    # 尝试从缓存里找
+    cached_articles= await get_cached_articles(page=page, limit=limit, keyword=keyword, author_nickname=author_nickname, author_id=author_id)
+    if cached_articles:
+        return [ArticleResponse(**item)for item in cached_articles]
+
+    skip=(page-1)*limit
     get_article_skip = select(DBArticle).join(DBArticle.owner).options(joinedload(DBArticle.owner))
     # 模糊搜索
     if keyword:
@@ -35,7 +43,15 @@ async def get_articles(db:AsyncSession,skip:int=0,limit:int=10,keyword:str=None,
         get_article_skip = get_article_skip.where(DBArticle.author_id == author_id)
     get_article_skip=get_article_skip.offset(skip).limit(limit).order_by(DBArticle.created_at.desc())
     result = await db.execute(get_article_skip)
-    return result.scalars().unique().all()
+    article_list= result.scalars().unique().all()
+    response_list = [ArticleResponse.model_validate(article) for article in  article_list]
+
+    # 写入缓存
+    if article_list:
+        cached_list=[item.model_dump(mode="json",by_alias=False) for item in response_list]
+        await set_cached_articles(page=page,data=cached_list,limit=limit,keyword=keyword,author_nickname=author_nickname,author_id=author_id)
+
+    return response_list
 
 # 写入
 async def create_article(db:AsyncSession,article:ArticleCreate,author_id: int):

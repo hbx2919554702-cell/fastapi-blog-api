@@ -39,9 +39,8 @@ async def get_articles(page:int=Query(1,ge=1,description="请求的页码从1开
                  author_nickname: Optional[str] = Query(None, description="搜索作者昵称"),
                  author_id: Optional[int] =Query(None,escription="搜索作者昵ID"),
                  db:AsyncSession = Depends(get_db)):
-    skip=(page-1)*limit
-    db_articles = await crud_articles.get_articles(skip=skip,limit=limit,keyword=keyword,db=db,author_nickname=author_nickname,author_id=author_id)
-    data = [ArticleResponse.model_validate(article) for article in db_articles]
+    db_articles = await crud_articles.get_articles(page=page,limit=limit,keyword=keyword,db=db,author_nickname=author_nickname,author_id=author_id)
+    data = [article.model_dump() for article in db_articles]
     return success_response(message="查询成功",data=data)
 
 # 更新文章
