@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.depends import get_current_user, get_current_user_optional
@@ -37,9 +37,10 @@ async def get_articles(page:int=Query(1,ge=1,description="请求的页码从1开
                  limit:int=Query(10,gt=1,le=20,description="每页数量"),
                  keyword:Optional[str]=Query(None,description="搜索文章标题关键字"),
                  author_nickname: Optional[str] = Query(None, description="搜索作者昵称"),
+                 author_id: Optional[int] =Query(None,escription="搜索作者昵ID"),
                  db:AsyncSession = Depends(get_db)):
     skip=(page-1)*limit
-    db_articles = await crud_articles.get_articles(skip=skip,limit=limit,keyword=keyword,db=db,author_nickname=author_nickname)
+    db_articles = await crud_articles.get_articles(skip=skip,limit=limit,keyword=keyword,db=db,author_nickname=author_nickname,author_id=author_id)
     data = [ArticleResponse.model_validate(article) for article in db_articles]
     return success_response(message="查询成功",data=data)
 
