@@ -6,9 +6,12 @@ ENV_FILE_PATH = os.path.join(BASE_DIR, ".env")
 
 class Settings(BaseSettings):
     SECRET_KEY: str
-    ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7
+    ALGORITHM: str
+    ACCESS_TOKEN_EXPIRE_MINUTES: int
     DATABASE_URL: str
+    REDIS_HOST: str
+    REDIS_PORT: int
+    REDIS_DB: int
 
 
     model_config = SettingsConfigDict(

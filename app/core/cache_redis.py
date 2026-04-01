@@ -1,11 +1,11 @@
 import json
 from typing import Any
-
 import redis.asyncio as redis
+from app.core.config import settings
 
-redis_client=redis.Redis(host="127.0.0.1",
-            port=6379,
-            db=0,
+redis_client=redis.Redis(host=settings.REDIS_HOST,
+            port=settings.REDIS_PORT,
+            db=settings.REDIS_DB,
             decode_responses=True)
 
 # 读字符串
