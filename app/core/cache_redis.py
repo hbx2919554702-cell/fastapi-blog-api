@@ -36,3 +36,16 @@ async def set_cache(key:str,value=Any,expire:int=3600):
     except Exception as e:
         print(f"设置缓存{e}失败")
         return False
+
+# 清除缓存
+async def delete_cached_articles(pattern:str):
+    try:
+        cursor="0"
+        while cursor!=0:
+            cursor,key=await redis_client.scan(cursor=cursor,match=pattern,count=100)
+            if key:
+                await redis_client.delete(*key)
+            return True
+    except Exception as e:
+        print(f"批量删除缓存失败:{e}")
+        return False

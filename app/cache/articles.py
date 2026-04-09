@@ -1,6 +1,6 @@
 from typing import List, Any, Dict, Optional
 
-from app.core.cache_redis import get_json_cache, set_cache
+from app.core.cache_redis import get_json_cache, set_cache, delete_cached_articles
 
 ARTICLES_KEY = "articles_list:"
 
@@ -29,3 +29,7 @@ async def set_cached_articles(page:int,limit:int,data:List[Dict[str, Any]],
                               author_id: Optional[int] = None, expire:int=1800  ):
     key = generate_articles_cache_key(page, limit, keyword, author_nickname, author_id)
     return await set_cache(key,data,expire)
+
+# 清除缓存-文章列表
+async def clear_cached_articles():
+    await delete_cached_articles(f"{ARTICLES_KEY}*")
