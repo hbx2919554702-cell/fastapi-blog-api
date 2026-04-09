@@ -13,6 +13,10 @@ class Settings(BaseSettings):
     REDIS_PORT: int
     REDIS_DB: int
 
+    CORS_ORIGINS: list[str] = [
+        "http://localhost:8080"
+    ]
+
 
     model_config = SettingsConfigDict(
         env_file=".env",

@@ -2,6 +2,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, Depends
 from fastapi.responses  import RedirectResponse
 
+from app.core.config import settings
 from app.core.depends import rate_limit
 from app.routers import articles, users, favorite, comment,history
 from app.core.exception import global_exception_handler
@@ -15,7 +16,7 @@ app.add_exception_handler(Exception, global_exception_handler)
 # 跨域中间件
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # 允许所有前端地址访问
+    allow_origins=settings.CORS_ORIGINS,  # 允许特定的前端地址访问
     allow_credentials=True,
     allow_methods=["*"],  # 允许所有请求方法(GET, POST, DELETE等)
     allow_headers=["*"],
