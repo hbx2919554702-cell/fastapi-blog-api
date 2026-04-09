@@ -1,5 +1,5 @@
 from typing import List, Any, Dict, Optional
-
+import random
 from app.core.cache_redis import get_json_cache, set_cache, delete_cached_articles
 
 ARTICLES_KEY = "articles_list:"
@@ -26,7 +26,7 @@ async def get_cached_articles(page:int,limit:int,keyword: Optional[str] = None,
 async def set_cached_articles(page:int,limit:int,data:List[Dict[str, Any]],
                               keyword: Optional[str] = None,
                               author_nickname: Optional[str] = None,
-                              author_id: Optional[int] = None, expire:int=1800  ):
+                              author_id: Optional[int] = None, expire:int=60+random.randint(0,60 ) ):
     key = generate_articles_cache_key(page, limit, keyword, author_nickname, author_id)
     return await set_cache(key,data,expire)
 

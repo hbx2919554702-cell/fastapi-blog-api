@@ -59,8 +59,7 @@ async def create_article(db:AsyncSession,article:ArticleCreate,author_id: int):
     db.add(db_article)
     await db.commit()
     await db.refresh(db_article)
-    # 清除缓存
-    await clear_cached_articles()
+
     return db_article
 
 # 删除
@@ -79,7 +78,6 @@ async def delete_article(db:AsyncSession,article_id:int,uer_id:int):
     await db.delete(article)
     await db.commit()
 
-    await clear_cached_articles()
     return True
 
 # 更新
@@ -91,5 +89,4 @@ async def update_article(db:AsyncSession,db_article:DBArticle,update_article:Art
     await db.commit()
     await db.refresh(db_article)
 
-    await clear_cached_articles()
     return db_article
