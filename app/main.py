@@ -1,9 +1,11 @@
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from fastapi.responses  import RedirectResponse
+
+from app.core.depends import rate_limit
 from app.routers import articles, users, favorite, comment,history
 
-app = FastAPI()
+app = FastAPI(dependencies=[Depends(rate_limit)])
 
 app.add_middleware(
     CORSMiddleware,
