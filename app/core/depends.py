@@ -4,6 +4,7 @@ from jose import jwt,JWTError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
+from app.core.logger import logger
 from app.crud.users import get_users
 from app.database import get_db
 from app.core.cache_redis import redis_client
@@ -53,6 +54,7 @@ async def get_current_user_optional(
         return None
     return user
 
+
 # 窗口限流器
 async def rate_limit(request: Request):
     client_ip=request.client.host
@@ -74,4 +76,4 @@ async def rate_limit(request: Request):
     except Exception as e:
         if isinstance(e, HTTPException):
             raise e
-        print(f"限流中间件 Redis 异常，执行降级放行: {e}")
+        logger.error(f"限流中间件 Redis 异常，执行降级放行: {e}")
