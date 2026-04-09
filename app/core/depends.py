@@ -63,10 +63,10 @@ async def rate_limit(request: Request):
     window_seconds=60
 
     try:
-        current_count=redis_client.incr(key)
+        current_count= await redis_client.incr(key)
         if current_count==1:
             await redis_client.expire(key, window_seconds)
-        if current_count>max_request:
+        if current_count > max_request:
             raise HTTPException(
                 status_code=status.HTTP_429_TOO_MANY_REQUESTS,
                 detail="您的操作过于频繁，请稍后再试"
