@@ -57,7 +57,11 @@ async def get_current_user_optional(
 
 # 窗口限流器
 async def rate_limit(request: Request):
-    client_ip=request.client.host
+    forwarded_for=request.headers.get("X-Forwarded-For")
+    if forwarded_for:
+        client_ip=forwarded_for.split(",")[0].strip()
+    else:
+        client_ip=request.headers.get("X-Real-Ip",request.client.host)
     path = request.url.path
     key=f"rate_limit_{client_ip}_{path}"
 
@@ -65,8 +69,15 @@ async def rate_limit(request: Request):
     window_seconds=60
 
     try:
-        current_count= await redis_client.incr(key)
-        if current_count==1:
+        async with redis_client.pipeline(transaction=True) as pipe:
+            pipe.incr(key)
+            pipe.ttl(key)
+            results=await pipe.execute()
+            current_count=results[0]
+            ttl=results[1]
+
+        # 如果是第一次访问，或者由于异常导致没有过期时间(ttl == -1)，则重置过期时间
+        if current_count==1 or ttl==-1:
             await redis_client.expire(key, window_seconds)
         if current_count > max_request:
             raise HTTPException(
