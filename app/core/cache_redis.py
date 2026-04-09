@@ -20,9 +20,9 @@ async  def get_cache(key:str):
 # 读字典或列表
 async def get_json_cache(key:str):
     try:
-        date=await redis_client.get(key)
-        if date:
-            return json.loads(date) #序列化
+        data=await redis_client.get(key)
+        if data:
+            return json.loads(data) #序列化
     except Exception as e:
         logger.error(f"获取JSON缓存{e}失败")
         return None
@@ -46,7 +46,7 @@ async def delete_cached_articles(pattern:str):
             cursor,key=await redis_client.scan(cursor=cursor,match=pattern,count=100)
             if key:
                 await redis_client.delete(*key)
-            return True
+        return True
     except Exception as e:
         logger.error(f"批量删除缓存失败:{e}")
         return False
