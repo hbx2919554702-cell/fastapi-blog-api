@@ -2,7 +2,7 @@ import json
 from sqlalchemy import select, delete, update, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
-from app.cache.articles import get_cached_articles,set_cached_articles
+from app.cache.articles import get_cached_articles, set_cached_articles, clear_cached_articles
 from app.models.articles import DBArticle
 from app.models.users import DBUser
 from app.schemas.articles import ArticleUpdate, ArticleCreate, ArticleResponse
@@ -59,6 +59,8 @@ async def create_article(db:AsyncSession,article:ArticleCreate,author_id: int):
     db.add(db_article)
     await db.commit()
     await db.refresh(db_article)
+    # 清除缓存
+    await clear_cached_articles()
     return db_article
 
 # 删除
@@ -76,6 +78,8 @@ async def delete_article(db:AsyncSession,article_id:int,uer_id:int):
 
     await db.delete(article)
     await db.commit()
+
+    await clear_cached_articles()
     return True
 
 # 更新
@@ -86,4 +90,6 @@ async def update_article(db:AsyncSession,db_article:DBArticle,update_article:Art
     db_article.updated_at=func.now()
     await db.commit()
     await db.refresh(db_article)
+
+    await clear_cached_articles()
     return db_article
