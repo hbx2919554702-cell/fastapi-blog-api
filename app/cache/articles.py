@@ -1,7 +1,7 @@
 import asyncio
 from typing import List, Any, Dict, Optional
 import random
-from sqlalchemy.ext.asyncio import AsyncSession
+from app.database import AsyncSessionLocal
 from app.core.cache_redis import get_json_cache, set_cache,delete_cached, redis_client
 from app.core.logger import logger
 from app.models.articles import DBArticle
@@ -61,9 +61,9 @@ async def delayed_sync_view_count(article_id:int,delay_seconds:int=300):
         result=await pipe.execute()
 
     incr_value=result[0]
-    if incr_value and incr_value > 0:
+    if incr_value and int(incr_value) > 0:
         total_incr=int(incr_value)
-        async with AsyncSession() as db:
+        async with AsyncSessionLocal() as db:
             stmt=update(DBArticle).where(DBArticle.id==article_id).values(view_count=DBArticle.view_count+total_incr)
             await db.execute(stmt)
             await db.commit()
