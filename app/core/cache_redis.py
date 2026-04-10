@@ -39,7 +39,7 @@ async def set_cache(key:str,value=Any,expire:int=3600):
         return False
 
 # 清除缓存
-async def delete_cached_articles(pattern:str):
+async def delete_cached(pattern:str):
     try:
         cursor="0"
         while cursor!=0:
