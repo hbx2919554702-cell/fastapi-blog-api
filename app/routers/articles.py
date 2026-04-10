@@ -5,8 +5,10 @@ from app.core.depends import get_current_user, get_current_user_optional
 from app.core.response import success_response
 from app.crud.history import add_history
 from app.database import get_db
-from app.schemas.articles import ArticleCreate, ArticleUpdate, ArticleResponse, ArticleDetail, ArticleShow
+from app.schemas.articles import ArticleCreate, ArticleUpdate, ArticleDetail, ArticleShow
 from app.crud import articles as crud_articles
+from fastapi import BackgroundTasks
+from app.cache.articles import incr_article_view, delayed_sync_view_count
 
 router = APIRouter(prefix="/api/articles", tags=["articles"])
 
@@ -21,11 +23,20 @@ async def create_article(article:ArticleCreate,
 
 # 根据id搜索文章
 @router.get("/get_articles_id/{article_id}")
-async def get_articles_id(article_id:int,db:AsyncSession = Depends(get_db),current_user=Depends(get_current_user_optional)):
+async def get_articles_id(article_id:int,
+                          background_tasks:BackgroundTasks,
+                          db:AsyncSession = Depends(get_db),
+                          current_user=Depends(get_current_user_optional)):
     db_article_id = await crud_articles.get_article_id(article_id=article_id,db=db)
     if db_article_id is None:
         raise HTTPException(status_code=404,detail='文章不存在')
+    # 将cache层任务丢给后台
+    current_incr=await incr_article_view(article_id=article_id)
+    if current_incr ==1:
+        background_tasks.add_task(delayed_sync_view_count,article_id,delay_seconds=300)
     data=ArticleDetail.model_validate(db_article_id)
+    # 视图合并
+    data.view_count+=current_incr
     if current_user:
         await add_history(db=db,article_id=article_id,user_id=current_user.id)
     return success_response(message="查询成功",data=data)
