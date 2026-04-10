@@ -44,7 +44,11 @@ async def clear_cached_articles():
 async def incr_article_view(article_id:int):
     key=f"article_view_incr_{article_id}"
     try:
-        return await redis_client.incr(key)
+        async with redis_client.pipeline(transaction=True) as pipe:
+            pipe.incr(key)
+            pipe.expire(key,400)
+            result=await pipe.execute()
+        return result[0]
     except Exception as e:
         logger.error(f"Redis浏览量incr失败{e}")
         return 0
@@ -55,15 +59,21 @@ async def delayed_sync_view_count(article_id:int,delay_seconds:int=300):
     await asyncio.sleep(delay_seconds)
     key = f"article_view_incr_{article_id}"
 
-    async with redis_client.pipeline(transaction=True) as pipe:
-        pipe.get(key)
-        pipe.delete(key)
-        result=await pipe.execute()
+    try:
+        async with redis_client.pipeline(transaction=True) as pipe:
+            pipe.get(key)
+            pipe.delete(key)
+            result=await pipe.execute()
 
-    incr_value=result[0]
-    if incr_value and int(incr_value) > 0:
-        total_incr=int(incr_value)
-        async with AsyncSessionLocal() as db:
-            stmt=update(DBArticle).where(DBArticle.id==article_id).values(view_count=DBArticle.view_count+total_incr)
-            await db.execute(stmt)
-            await db.commit()
+        incr_value=result[0]
+        if incr_value and int(incr_value) > 0:
+            total_incr=int(incr_value)
+            async with AsyncSessionLocal() as db:
+                stmt=update(DBArticle).where(DBArticle.id==article_id).values(view_count=DBArticle.view_count+total_incr)
+                await db.execute(stmt)
+                await db.commit()
+            logger.info(f"[后台任务成功] 文章 {article_id} 的 {total_incr} 个浏览量已成功写入 MySQL！")
+        else:
+            logger.info(f"[后台任务结束] 文章 {article_id} 没有新增浏览量。")
+    except Exception as e:
+        logger.error(f"[后台任务灾难] 文章 {article_id} 浏览量落盘失败: {e}", exc_info=True)
