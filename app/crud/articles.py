@@ -1,28 +1,19 @@
-import json
-from sqlalchemy import select, delete, update, func
+from sqlalchemy import select, delete, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
-from app.cache.articles import get_cached_articles, set_cached_articles, clear_cached_articles
+from app.cache.articles import get_cached_articles, set_cached_articles
 from app.models.articles import DBArticle
 from app.models.users import DBUser
 from app.schemas.articles import ArticleUpdate, ArticleCreate, ArticleResponse
 from app.models.comment import Comment
 from app.models.favorite import Favorite
 from app.models.history import History
-
 # 根据id查询
 async def get_article_id(db:AsyncSession,article_id:int):
     db_article=(select(DBArticle).options(joinedload(DBArticle.owner)).
                 where(DBArticle.id == article_id))
     result = await db.execute(db_article)
     article = result.scalar_one_or_none()
-
-    if not article:
-        return None
-    stmt = (update(DBArticle).where(DBArticle.id == article_id).values(view_count=DBArticle.view_count + 1))
-    await db.execute(stmt)
-    await db.commit()
-    await db.refresh(article)
     return article
 
 # 查询全部
