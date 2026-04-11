@@ -56,3 +56,17 @@ class ArticleShow(BaseModel):
         populate_by_name=True,
         from_attributes=True
     )
+
+class ArticleListResponse(BaseModel):
+    id:int
+    author_id:int
+    title:str=Field(min_length=2,max_length=25,description="文章名要求2到25个字符",json_schema_extra={"example": ""})
+    created_at:Optional[datetime]=None
+    updated_at:Optional[datetime]=None
+    nickname:str=Field(validation_alias=AliasPath("owner","nickname"))
+    view_count:int
+
+    model_config = ConfigDict(
+        populate_by_name=True,
+        from_attributes=True
+        )
