@@ -16,7 +16,7 @@ class DBArticle(Base):
     id:Mapped[int]=mapped_column(Integer,primary_key=True,index=True,autoincrement=True,comment="文章编号")
     title:Mapped[str]=mapped_column(String(50),nullable=False,comment="标题")
     content:Mapped[str]=mapped_column(Text,comment="内容")
-    created_at:Mapped[datetime]=mapped_column(DateTime, default=func.now(), comment="发布时间")
+    created_at:Mapped[datetime]=mapped_column(DateTime, default=func.now(), comment="发布时间",index=True)
     updated_at:Mapped[datetime]=mapped_column(DateTime, default=func.now(), onupdate=func.now(), comment="更新时间")
     author_id:Mapped[int]=mapped_column(Integer, ForeignKey("user.id"),comment="作者")
     view_count:Mapped[int]=mapped_column(Integer,default=0,comment="浏览量")
