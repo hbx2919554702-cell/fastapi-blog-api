@@ -7,7 +7,7 @@ from app.core.depends import rate_limit
 from app.routers import articles, users, favorite, comment,history
 from app.core.exception import global_exception_handler
 from app.database import async_engine
-
+from app.core.cache_redis import redis_client
 # 生命周期管理
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -15,6 +15,9 @@ async def lifespan(app: FastAPI):
     if async_engine:
         await async_engine.dispose()
         print("====== 数据库异步连接池已销毁 ======")
+
+    await redis_client.aclose()
+    print("===Redis 异步连接池已销毁===")
 
 # 限流依赖
 app = FastAPI(dependencies=[Depends(rate_limit)],lifespan=lifespan)
