@@ -43,10 +43,11 @@ async def clear_cached_articles():
 # 增加浏览量缓存
 async def incr_article_view(article_id:int):
     key=f"article_view_incr_{article_id}"
+    set_key="pending_sync_articles"
     try:
         async with redis_client.pipeline(transaction=True) as pipe:
             pipe.incr(key)
-            pipe.expire(key,400)
+            pipe.sadd(set_key, article_id)
             result=await pipe.execute()
         return result[0]
     except Exception as e:
