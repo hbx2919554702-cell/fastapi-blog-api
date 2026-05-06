@@ -3,13 +3,14 @@
 *.sqlite3
 *.html
 *.docx
-*.md
 # 忽略 Python 编译产生的缓存文件夹
 __pycache__/
 *.py[cod]
 
 # 忽略 PyCharm 自己的配置文件
 .idea/
+# 忽略环境变量文件（含敏感密钥，禁止提交）
+.env
 # 忽略虚拟环境（如果你建了的话）
 venv/
 env/
