@@ -58,8 +58,8 @@ async def create_article(db:AsyncSession,article:ArticleCreate,author_id: int):
     return db_article
 
 # 删除
-async def delete_article(db:AsyncSession,article_id:int,uer_id:int):
-    query = select(DBArticle).where(DBArticle.id == article_id, DBArticle.author_id == uer_id)
+async def delete_article(db:AsyncSession,article_id:int,user_id:int):
+    query = select(DBArticle).where(DBArticle.id == article_id, DBArticle.author_id == user_id)
     result = await db.execute(query)
     article = result.scalar_one_or_none()
 

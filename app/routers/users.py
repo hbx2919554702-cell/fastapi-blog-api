@@ -33,9 +33,10 @@ async def login_user(form_data: OAuth2PasswordRequestForm = Depends(),db:AsyncSe
         raise HTTPException(status_code=401,detail="用户密码错误")
     # 登录以后拿到一个新token
     access_token = create_access_token(data={"sub": user.username})
-    return {"access_token": access_token,
-            "token_type": "bearer",
-            "message":"登陆成功！"}
+    return success_response(message="登录成功",data={"access_token": access_token,
+                                                    "token_type": "bearer",
+                                                    "message":"登陆成功！"}
+)
 
 # 查找用户
 @router.get('/Users',response_model=List[UserResponse])

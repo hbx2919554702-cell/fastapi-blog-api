@@ -57,11 +57,9 @@ async def get_current_user_optional(
 
 # 窗口限流器
 async def rate_limit(request: Request):
-    forwarded_for=request.headers.get("X-Forwarded-For")
-    if forwarded_for:
-        client_ip=forwarded_for.split(",")[0].strip()
-    else:
-        client_ip=request.headers.get("X-Real-Ip",request.client.host)
+    client_ip=request.headers.get("X-Real-IP")
+    if not client_ip:
+        client_ip=request.client.host
     path = request.url.path
     key=f"rate_limit_{client_ip}_{path}"
 
