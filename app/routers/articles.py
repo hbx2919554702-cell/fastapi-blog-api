@@ -45,7 +45,7 @@ async def get_articles(page:int=Query(1,ge=1,description="请求的页码从1开
                  limit:int=Query(10,gt=1,le=20,description="每页数量"),
                  keyword:Optional[str]=Query(None,description="搜索文章标题关键字"),
                  author_nickname: Optional[str] = Query(None, description="搜索作者昵称"),
-                 author_id: Optional[int] =Query(None,escription="搜索作者昵ID"),
+                 author_id: Optional[int] =Query(None,description="搜索作者ID"),
                  db:AsyncSession = Depends(get_db)):
     db_articles = await crud_articles.get_articles(page=page,limit=limit,keyword=keyword,db=db,author_nickname=author_nickname,author_id=author_id)
     data = [article.model_dump() for article in db_articles]
@@ -73,7 +73,7 @@ async def delete_article(article_id:int,db:AsyncSession= Depends(get_db),
     if not db_article:
         raise HTTPException(status_code=404, detail="文章不存在")
 
-    delete_result = await crud_articles.delete_article(db=db, article_id=article_id, uer_id=current_user.id)
+    delete_result = await crud_articles.delete_article(db=db, article_id=article_id, user_id=current_user.id)
     if not delete_result:
         raise HTTPException(status_code=403, detail="越权操作：你无权删除他人的文章！")
     return success_response(message=f"ID为{article_id}的文章删除成功")

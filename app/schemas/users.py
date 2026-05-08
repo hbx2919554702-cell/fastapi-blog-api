@@ -4,7 +4,7 @@ from pydantic import BaseModel, Field, ConfigDict
 
 #创建用户
 class UserCreate(BaseModel):
-    username: str=Field(min_length=2,max_length=20,pattern=r"^[a-zA-Z0-9]+$"
+    username: str=Field(min_length=3,max_length=20,pattern=r"^[a-zA-Z0-9]+$"
                         ,description="用户名要求3到20个字符,仅限英文大小写加数字",json_schema_extra={"example": ""})
     password: str=Field(min_length=6,max_length=20,pattern=r"^[a-zA-Z0-9]+$"
                         ,description="密码至少6位,仅限英文大小写加数字",json_schema_extra={"example": ""})
@@ -62,4 +62,4 @@ class UserUpdateRequest(BaseModel):
 # 修改密码
 class UserPassword(BaseModel):
     old_password: str=Field(...,alias="oldPassword",description="旧密码")
-    new_password: str=Field(...,min_length=6,pattern=r"^[a-zA-Z0-9]+$",alias="newPassword",description="新密码要求6到20个字符，仅限英文大小写加数字")
+    new_password: str=Field(...,min_length=6,max_length=20,pattern=r"^[a-zA-Z0-9]+$",alias="newPassword",description="新密码要求6到20个字符，仅限英文大小写加数字")

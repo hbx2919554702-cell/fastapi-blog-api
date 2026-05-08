@@ -35,7 +35,7 @@ async def get_history(page:int=Query(1,ge=1,description="请求的页码从1开�
         "history_at":history_at,
         "owner":{"nickname":articles.owner.nickname if articles.owner.nickname else "匿名用户"}
     }for articles,history_id,history_at in rows]
-    has_more=page*limit>total
+    has_more=total>page*limit
     data=HistoryListResponse(list=history_list,total=total,hasMore=has_more)
     return success_response(message="获取浏览记录列表成功",data=data)
 
@@ -44,7 +44,7 @@ async def get_history(page:int=Query(1,ge=1,description="请求的页码从1开�
 async def delete_history(article_id:int,db:AsyncSession=Depends(get_db),
                          user:DBUser = Depends(get_current_user)):
     history= await delete_history_user(db=db,article_id=article_id,user_id=user.id)
-    if history is None:
+    if not history:
         raise HTTPException(status_code=404,detail="清除浏览记录失败")
     return success_response(message="清除浏览记录成功")
 

@@ -45,7 +45,7 @@ async def consume_view_count():
                 async with redis_client.pipeline(transaction=True) as pipe:
                     for aid in valid_ids:
                         pipe.delete(f"article_view_incr_{aid}")
-                        pipe.sadd(set_key, aid)
+                        pipe.srem(set_key, aid)
                     await pipe.execute()
                 logger.info(f"成功将{len(bulk_data)}篇文章的浏览量写入数据库。")
         except Exception as e:

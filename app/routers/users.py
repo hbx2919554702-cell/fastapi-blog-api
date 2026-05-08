@@ -2,10 +2,11 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi.responses import JSONResponse
 from app.core.response import success_response
 from app.database import get_db
 from app.models.users import DBUser
-from app.schemas.users import UserResponse, UserCreate, Token, UserAuthResponse, UserInfoResponse, UserUpdateRequest, \
+from app.schemas.users import UserResponse, UserCreate, UserAuthResponse, UserInfoResponse, UserUpdateRequest, \
     UserPassword
 from app.crud.users import get_users, create_user, update_user, update_password, \
     get_user_by_nickname
@@ -26,17 +27,17 @@ async def register_user(user:UserCreate, db:AsyncSession=Depends(get_db)):
 
 
 # 登录
-@router.post("/login",response_model=Token)
+@router.post("/login")
 async def login_user(form_data: OAuth2PasswordRequestForm = Depends(),db:AsyncSession=Depends(get_db)):
     user=await get_users(db=db,username=form_data.username)
     if not user or not verify_password(form_data.password,user.hashed_password):
         raise HTTPException(status_code=401,detail="用户密码错误")
     # 登录以后拿到一个新token
     access_token = create_access_token(data={"sub": user.username})
-    return success_response(message="登录成功",data={"access_token": access_token,
-                                                    "token_type": "bearer",
-                                                    "message":"登陆成功！"}
-)
+    return JSONResponse(content={
+        "access_token": access_token,
+        "token_type": "bearer"
+    })
 
 # 查找用户
 @router.get('/Users',response_model=List[UserResponse])
@@ -48,7 +49,7 @@ async def read_users(
 ):
     skip=(page-1)*limit
     user=await get_user_by_nickname(db=db,limit=limit,skip=skip,keyword=keyword)
-    if user is None:
+    if not user:
         raise HTTPException(status_code=404,detail="作者不存在")
     return user
 
